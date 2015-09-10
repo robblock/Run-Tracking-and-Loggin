@@ -17,9 +17,7 @@ class PastRun: PFObject, PFSubclassing {
     @NSManaged var distance: String
     @NSManaged var date: String
     
-    @NSManaged var latitude: NSNumber
-    @NSManaged var longitude: NSNumber
-    
+    @NSManaged var image: PFFile
     @NSManaged var run: NSManagedObject
     
     
@@ -44,13 +42,15 @@ class PastRun: PFObject, PFSubclassing {
         return query
     }
     
-    init(pace: String, timeStamp: String, date: String, distance: String) {
+    init(image: PFFile, pace: String, timeStamp: String, date: String, distance: String) {
         super.init()
         
+        self.image = image
         self.pace = pace
         self.timeStamp = timeStamp
         self.date = date
         self.distance = distance
+        
     }
     
     override init() {
@@ -58,4 +58,7 @@ class PastRun: PFObject, PFSubclassing {
     }
     
 }
+
+
+
 

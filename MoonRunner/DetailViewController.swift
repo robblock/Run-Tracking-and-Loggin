@@ -9,9 +9,9 @@ import CoreData
 import Parse
 
 class DetailViewController: UIViewController {
+
     var run: Run!
-    
-    
+
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
@@ -43,9 +43,6 @@ class DetailViewController: UIViewController {
         
         loadMap()
     }
-    
-    
-    
     
     
     func mapRegion() -> MKCoordinateRegion {
@@ -118,13 +115,48 @@ class DetailViewController: UIViewController {
                 cancelButtonTitle: "OK").show()
         }
     }
+    
+    //TODO: Add MKPolyline Overlay
+    func mapSnapshot()  {
+        var snapShotterOptions = MKMapSnapshotOptions()
+        snapShotterOptions.region = mapView.region
+        snapShotterOptions.scale = UIScreen.mainScreen().scale
+        snapShotterOptions.size = mapView.frame.size
+        
+        var finalImage = UIImage()
+        var snapShotter = MKMapSnapshotter(options: snapShotterOptions)
+        
+        snapShotter.startWithCompletionHandler { (snapshot:MKMapSnapshot!, error:NSError!) -> Void in
+            if(error != nil) {
+                println("error: " + error.localizedDescription);
+                return
+            }
+            
+            var image:UIImage = snapshot.image
+            var data:NSData = UIImagePNGRepresentation(image)
+            
+            //1
+            let file = PFFile(name: "CompletedRun", data: data)
+            file.saveInBackgroundWithBlock({ (succeeded, error) -> Void in
+                if succeeded {
+                    //2
+                    self.saveToParse(file)
+                } else if let error = error {
+                    //3
+                    self.showErrorView(error)
+                }
+                }, progressBlock: { percent in
+                    //4
+                    println("Uploaded: \(percent)%")
+            })
+        }
+    }
 
-    func saveToParse() {
+    //TODO: Make catagory and value seperate labels
+    func saveToParse(file: PFFile) {
         let user = PFUser()
         
-        let pastRun = PastRun(pace: self.paceLabel.text!, timeStamp: self.timeLabel.text!, date: self.dateLabel.text!, distance: self.distanceLabel.text!)
-        
-        
+        let pastRun = PastRun(image: file, pace: self.paceLabel.text!, timeStamp: self.timeLabel.text!, date: self.dateLabel.text!, distance: self.distanceLabel.text!)
         
         pastRun.saveInBackgroundWithBlock { succeeded, error in
             if succeeded {
@@ -142,7 +174,7 @@ class DetailViewController: UIViewController {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "SaveRunToTableView" {
             
-            saveToParse()
+            mapSnapshot()
             
             let paceUnit = HKUnit.secondUnit().unitDividedByUnit(HKUnit.meterUnit())
             let dateFormatter = NSDateFormatter()
@@ -167,6 +199,7 @@ class DetailViewController: UIViewController {
     }
     
 }
+
 //MARK: - DecimalFormatter
 extension Double {
     func format(f: String) -> String {

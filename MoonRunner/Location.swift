@@ -7,7 +7,7 @@
 //
 import Foundation
 import CoreData
-
+import Parse
 
 class Location: NSManagedObject {
 
