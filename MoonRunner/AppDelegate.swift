@@ -41,6 +41,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     Parse.setApplicationId("MGXHqX0wEqU6rArWtp1xLIsFNwRfw8Ul0GvLgHwc",
         clientKey: "wGrMicFNmq6kXJr8SLA6iPxWdi6jGvkLVPnBzLS5")
+    
+    //Parse Security - Every new object will be equipped with public read and write access that is limited to the objects creator
+    let acl = PFACL()
+    acl.setPublicReadAccess(true)
+    PFACL.setDefaultACL(acl, withAccessForCurrentUser: true)
+    
     return true
   }
 

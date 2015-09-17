@@ -20,6 +20,8 @@ class PastRun: PFObject, PFSubclassing {
     @NSManaged var image: PFFile
     @NSManaged var run: NSManagedObject
     
+    @NSManaged var runFile: UIImage
+    
     
     
     //1

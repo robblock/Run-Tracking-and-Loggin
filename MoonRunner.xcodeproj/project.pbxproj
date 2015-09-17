@@ -161,8 +161,8 @@
 		870F825F1A24E70F00776E2F /* MoonRunner */ = {
 			isa = PBXGroup;
 			children = (
-				870F82621A24E70F00776E2F /* AppDelegate.swift */,
 				78CE0D631AFBEA36009BBE75 /* Models */,
+				870F82621A24E70F00776E2F /* AppDelegate.swift */,
 				8772AB591A26347A00613309 /* HomeViewController.swift */,
 				874B42141A9C344500081A45 /* NewRunViewController.swift */,
 				870F82691A24E70F00776E2F /* DetailViewController.swift */,

@@ -44,7 +44,7 @@ class DetailViewController: UIViewController {
         loadMap()
     }
     
-    
+    //MARK: - Configuring the Map
     func mapRegion() -> MKCoordinateRegion {
         
         
@@ -115,8 +115,9 @@ class DetailViewController: UIViewController {
                 cancelButtonTitle: "OK").show()
         }
     }
+    //MARK: - Parse 
     
-    //TODO: Add MKPolyline Overlay
+    //TODO: Add MKPolyline Overlay Without Going Crazy
     func mapSnapshot()  {
         var snapShotterOptions = MKMapSnapshotOptions()
         snapShotterOptions.region = mapView.region
@@ -134,7 +135,7 @@ class DetailViewController: UIViewController {
             
             var image:UIImage = snapshot.image
             var data:NSData = UIImagePNGRepresentation(image)
-            
+
             //1
             let file = PFFile(name: "CompletedRun", data: data)
             file.saveInBackgroundWithBlock({ (succeeded, error) -> Void in
@@ -169,11 +170,13 @@ class DetailViewController: UIViewController {
         }
     }
     
+    //MARK: - Saving Data
     
     //Passing variables to PastRuns Controller
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "SaveRunToTableView" {
             
+            //Takes snapshot of map, begins saving in background, saves run variables to parse and finally segues to saved pastRunViewController
             mapSnapshot()
             
             let paceUnit = HKUnit.secondUnit().unitDividedByUnit(HKUnit.meterUnit())
@@ -192,12 +195,8 @@ class DetailViewController: UIViewController {
             controller.paceUnit = HKUnit.secondUnit().unitDividedByUnit(HKUnit.meterUnit())
             controller.paceQuantity = HKQuantity(unit: paceUnit, doubleValue: run.duration.doubleValue / run.distance.doubleValue)
             controller.dateOfRun = run.timestamp
-            
-            
-            
         }
     }
-    
 }
 
 //MARK: - DecimalFormatter
@@ -206,6 +205,7 @@ extension Double {
         return String(format: "%/(f)f", self)
     }
 }
+
 // MARK: - MKMapViewDelegate
 extension DetailViewController: MKMapViewDelegate {
 }
