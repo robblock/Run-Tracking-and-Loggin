@@ -8,10 +8,14 @@ import HealthKit
 import CoreData
 import Parse
 
+
 class DetailViewController: UIViewController {
 
     var run: Run!
+    var managedObjectContext: NSManagedObjectContext?
 
+    
+    //MARK: - Outlets & Actions
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
@@ -23,9 +27,9 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         
-
     }
     
+    //Mark: - Configuring Variables
    func configureView() {
         let distanceQuantity = HKQuantity(unit: HKUnit.footUnit(), doubleValue: run.distance.doubleValue)
         distanceLabel.text = "Distance: " + distanceQuantity.description
@@ -56,6 +60,7 @@ class DetailViewController: UIViewController {
         var maxLng = minLng
         
         let locations = run.locations.array as! [Location]
+
         
         for location in locations {
             minLat = min(minLat, location.latitude.doubleValue)
@@ -69,6 +74,7 @@ class DetailViewController: UIViewController {
                 longitude: (minLng + maxLng)/2),
             span: MKCoordinateSpan(latitudeDelta: (maxLat - minLat)*1.1,
                 longitudeDelta: (maxLng - minLng)*1.1))
+        
     }
     
     func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
@@ -95,6 +101,10 @@ class DetailViewController: UIViewController {
         return MKPolyline(coordinates: &coords, count: run.locations.count)
     }
     
+    func pointsToWKT() {
+        
+    }
+
     func loadMap() {
         if run.locations.count > 0 {
             mapView.hidden = false
@@ -105,6 +115,7 @@ class DetailViewController: UIViewController {
             // Make the line(s!) on the map
             let colorSegments = MulticolorPolylineSegment.colorSegments(forLocations: run.locations.array as! [Location])
             mapView.addOverlays(colorSegments)
+        
         } else {
             // No locations were found!
             mapView.hidden = true
@@ -115,6 +126,7 @@ class DetailViewController: UIViewController {
                 cancelButtonTitle: "OK").show()
         }
     }
+    
     //MARK: - Parse 
     
     //TODO: Add MKPolyline Overlay Without Going Crazy
@@ -135,7 +147,7 @@ class DetailViewController: UIViewController {
             
             var image:UIImage = snapshot.image
             var data:NSData = UIImagePNGRepresentation(image)
-
+            
             //1
             let file = PFFile(name: "CompletedRun", data: data)
             file.saveInBackgroundWithBlock({ (succeeded, error) -> Void in
@@ -171,25 +183,29 @@ class DetailViewController: UIViewController {
     }
     
     //MARK: - Saving Data
+    //CoreData
+
+    
     
     //Passing variables to PastRuns Controller
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "SaveRunToTableView" {
             
-            //Takes snapshot of map, begins saving in background, saves run variables to parse and finally segues to saved pastRunViewController
+            //Takes snapshot of map, begins saving in background, saves run variables to coredata & parse and finally segues to saved pastRunViewController
             mapSnapshot()
+            
             
             let paceUnit = HKUnit.secondUnit().unitDividedByUnit(HKUnit.meterUnit())
             let dateFormatter = NSDateFormatter()
             dateFormatter.dateStyle = .MediumStyle
-            let colorSegments = MulticolorPolylineSegment.colorSegments(forLocations: run.locations.array as! [Location])
+
 
             //Get the destination controller
             let controller = segue.destinationViewController as! PastRunsTableViewController
             
             //Sending data to PastRunsTableViewController
-            controller.mapRegion = mapRegion()
-            controller.colorSegments = colorSegments
+            controller.mapRegionData = mapRegion()
+
             controller.distanceQuantity = HKQuantity(unit: HKUnit.meterUnit(), doubleValue: run.distance.doubleValue)
             controller.secondsQuantity = HKQuantity(unit: HKUnit.secondUnit(), doubleValue: run.duration.doubleValue)
             controller.paceUnit = HKUnit.secondUnit().unitDividedByUnit(HKUnit.meterUnit())
@@ -219,3 +235,25 @@ extension UIViewController {
             }
         }
 }
+
+//TODO: Polyline to Parse
+//MARK: - Extend CLLocationCoordinate2D so it can be both be instantiated and represented as a string
+public protocol WKTSerializable {
+    func WKTValueString() -> String;
+    init(_string: String);
+}
+
+extension CLLocationCoordinate2D : WKTSerializable {
+    public func WKTValueString() -> String {
+        return "\(self.latitude) \(self.longitude)";
+    }
+    public init(_string string: String) {
+        let componenets = string.componentsSeparatedByString(" ");
+        self.latitude = (componenets[0] as NSString).doubleValue;
+        self.longitude = (componenets[1] as NSString).doubleValue;
+    }
+}
+
+
+
+

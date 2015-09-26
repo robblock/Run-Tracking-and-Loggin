@@ -6,4 +6,6 @@
 //  Copyright (c) 2015 Zedenem. All rights reserved.
 //
 
-import Foundation
+import CoreLocation
+import UIKit
+

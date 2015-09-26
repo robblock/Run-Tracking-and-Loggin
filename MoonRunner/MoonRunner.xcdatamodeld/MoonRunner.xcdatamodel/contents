@@ -15,7 +15,7 @@
     </entity>
     <elements>
         <element name="Location" positionX="189" positionY="129" width="128" height="105"/>
-        <element name="Run" positionX="-63" positionY="-18" width="128" height="105"/>
-        <element name="PastRun" positionX="63" positionY="90" width="128" height="45"/>
+        <element name="PastRun" positionX="-126" positionY="162" width="128" height="45"/>
+        <element name="Run" positionX="-63" positionY="-18" width="128" height="103"/>
     </elements>
 </model>

@@ -89,7 +89,6 @@ class NewRunViewController: UIViewController {
         elapsedTime -= NSTimeInterval(seconds)
         
         //let fraction = UInt8(elapsedTime * 100)
-
         
         let strMinutes = String(format: "%02d", minutes)
         let strSeconds = String(format: "%02d", seconds)
@@ -118,7 +117,6 @@ class NewRunViewController: UIViewController {
         savedRun.duration = seconds
         savedRun.timestamp = NSDate()
         
-
         // 2
         var savedLocations = [Location]()
         for location in locations {
@@ -141,11 +139,39 @@ class NewRunViewController: UIViewController {
         }
     }
     
+    //Methods that takes a snapshot, the completion block will pass data
+    func requestSnapshotData(mapView: MKMapView, completion: (data: NSData!, error: NSError!) -> ()) {
+        let options = MKMapSnapshotOptions()
+        options.region = mapView.region
+        options.size = mapView.frame.size
+        options.scale = UIScreen.mainScreen().scale
+        
+        
+        let snapshotter = MKMapSnapshotter(options: options)
+        snapshotter.startWithCompletionHandler() {
+            snapshot, error in
+            
+            if error != nil {
+                completion(data: nil, error: error)
+                return
+            }
+            
+            let image = snapshot.image
+            let data = UIImagePNGRepresentation(image)
+            completion(data: data, error: nil)
+            println("MapSnapshotter")
+           
+        }
+
+    }
+
     
     
-//    func smoothStart() {
-//        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), <#block: dispatch_block_t##() -> Void#>)
-//    }
+    //TODO: PolyLine into WKTString
+    
+    
+    
+    //TODO: Map loads asyncronosly with timer and other metrics -- GCD
     
     @IBAction func startPressed(sender: AnyObject) {
         startButton.hidden = true
@@ -179,9 +205,11 @@ class NewRunViewController: UIViewController {
         actionSheet.actionSheetStyle = .Default
         actionSheet.showInView(view)
         
+        //Need two timers because each timer is firing at different millisecond intervals
         timer.invalidate()
         timerTwo.invalidate()
         
+        //Stops/Pauses location tracking
         locationManager.stopUpdatingLocation()
     
     }
@@ -241,6 +269,7 @@ extension NewRunViewController: UIActionSheetDelegate {
     func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
         //save
         if buttonIndex == 1 {
+            
             saveRun()
             performSegueWithIdentifier(DetailSegueName, sender: nil)
         }
